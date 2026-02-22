@@ -122,9 +122,9 @@ void loop() {
     if (elapsed >= 1000) {
       tft.setTextColor(0x0000, C_YELLOW); 
       tft.setTextSize(2); 
-      tft.setCursor(75, 90); 
+      tft.setCursor(85, 90); 
       tft.print("Cosmos");
-      tft.setCursor(70, 120); 
+      tft.setCursor(85, 120); 
       if (gotTime) {
         char dateBuf[12]; strftime(dateBuf, sizeof(dateBuf), "%a %d", &timeinfo);
         tft.print(dateBuf);
