@@ -35,7 +35,8 @@ unsigned long bootStartTime = 0;
 bool isBooting = true;
 int lastBootRadius = 0;
 String currentMsg = ""; 
-String lastMsg = "";    
+String lastMsg = "";
+String terminalLog = "Wait of command...";    
 bool deviceConnected = false;
 bool timeIsSynced = false;
 #define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -64,17 +65,26 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 void handleRoot() {
   String html = "<html><body style='font-family:sans-serif; text-align:center; background:#111; color:white;'>";
   html += "<h1>COSMOS MISSION CONTROL</h1>";
-  html += "<img id='camstream' src='http://YoureCamIP/jpg' style='width:90%; max-width:600px; border-radius:15px; border:2px solid #555; margin-bottom:20px;'><br>";
+  html += "<img id='camstream' src='http://youreCamIP/jpg' style='width:90%; max-width:600px; border-radius:15px; border:2px solid #555; margin-bottom:20px;'><br>";
   html += "<script>";
   html += "setInterval(function() {";
-  html += "  document.getElementById('camstream').src = 'http://YoureCamIP/jpg?' + new Date().getTime();";
+  html += "  document.getElementById('camstream').src = 'http://youreCamIP/jpg?' + new Date().getTime();";
   html += "}, 200);";
   html += "</script>";
   html += "<form action='/msg' method='POST'>";
   html += "<textarea name='text' rows='4' style='width:90%; font-size:1.2em; border-radius:5px;'></textarea><br><br>";
   html += "<input type='submit' value='SEND TO OLED' style='padding:10px 20px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:5px;'>";
   html += "</form>";
-  html += "<br><form action='/clear' method='POST'><input type='submit' value='Oled back to clock' style='padding:10px 20px; border-radius:5px;'></form>";
+  html += "<br><form action='/clear' method='POST'><input type='submit' value='OLED BACK TO CLOCK' style='padding:10px 20px; border-radius:5px;'></form><br>";
+  html += "<div style='background:#000; color:#0f0; font-family:monospace; text-align:left; padding:10px; height:120px; overflow-y:auto; border:1px solid #333; width:90%; margin: 0 auto; border-radius:5px;'>";
+  html += "COSMOS OS v1.0 (ESP32-S3 Port)<br>";
+  html += "Memory: OK<br>";
+  html += "C:\\> <span id='output'>" + terminalLog + "</span>";
+  html += "</div>";
+  html += "<form action='/cmd' method='POST' style='margin-top:5px;'>";
+  html += "<input type='text' name='command' autofocus autocomplete='off' style='background:#000; color:#0f0; font-family:monospace; width:70%; border:1px solid #333; padding:8px;' placeholder='z.B. reboot, cls, ping, echo text'>";
+  html += "<input type='submit' value='EXECUTE' style='background:#333; color:#0f0; border:none; padding:9px; font-weight:bold;'>";
+  html += "</form>";
   html += "</body></html>";
   server.send(200, "text/html", html);
 }
@@ -85,6 +95,37 @@ void handleMessage() {
 void handleClear() {
   currentMsg = "";
   server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=/'></head><body></body></html>");
+}
+void handleCmd() {
+  String cmd = server.arg("command");
+  cmd.trim();
+  String lowerCmd = cmd;
+  lowerCmd.toLowerCase();
+  if (lowerCmd == "reboot") {
+    server.send(200, "text/html", "<html><body style='background:#000; color:#0f0; font-family:monospace;'>System rebooting... Bitte kurz warten.</body></html>");
+    delay(1000);
+    ESP.restart();
+  } 
+  else if (lowerCmd == "ping") {
+    terminalLog = "pong! (Verbindung steht)";
+  }
+  else if (lowerCmd == "cls" || lowerCmd == "clear") {
+    terminalLog = "Warte auf Befehl...";
+  }
+  else if (lowerCmd.startsWith("echo ")) {
+    String textToOled = cmd.substring(5); 
+    currentMsg = textToOled; 
+    terminalLog = "Erfolgreich an OLED gesendet: " + textToOled;
+  }
+  else if (lowerCmd == "") {
+    terminalLog = "Bitte Befehl eingeben.";
+  }
+  else {
+    terminalLog = "Befehl nicht gefunden: " + cmd;
+  }
+  if (lowerCmd != "reboot") {
+    server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=/'></head><body></body></html>");
+  }
 }
 void setup() {
   Serial.begin(115200);
@@ -109,6 +150,7 @@ void setup() {
   server.on("/msg", HTTP_POST, handleMessage);
   server.on("/clear", HTTP_POST, handleClear);
   server.begin();
+  server.on("/cmd", HTTP_POST, handleCmd);
   bootStartTime = millis(); 
 }
 void loop() {
