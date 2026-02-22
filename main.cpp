@@ -63,12 +63,13 @@ class MyCallbacks: public BLECharacteristicCallbacks {
 };
 void handleRoot() {
   String html = "<html><body style='font-family:sans-serif; text-align:center; background:#111; color:white;'>";
-  html += "<h1>COSMOS NOTEPAD</h1>";
+  html += "<h1>COSMOS MISSION CONTROL</h1>";
+  html += "<img src='http://YoureCamIP:81/stream' style='width:90%; max-width:600px; border-radius:15px; border:2px solid #555; margin-bottom:20px;'><br>";
   html += "<form action='/msg' method='POST'>";
-  html += "<textarea name='text' rows='4' style='width:90%; font-size:1.2em;'></textarea><br><br>";
-  html += "<input type='submit' value='SEND TO OLED' style='padding:10px 20px;'>";
+  html += "<textarea name='text' rows='4' style='width:90%; font-size:1.2em; border-radius:5px;'></textarea><br><br>";
+  html += "<input type='submit' value='SEND TO OLED' style='padding:10px 20px; font-weight:bold;'>";
   html += "</form>";
-  html += "<br><form action='/clear' method='POST'><input type='submit' value='ZURUECK ZUR UHR' style='padding:10px 20px;'></form>";
+  html += "<br><form action='/clear' method='POST'><input type='submit' value='OLED back to clock' style='padding:10px 20px;'></form>";
   html += "</body></html>";
   server.send(200, "text/html", html);
 }
@@ -124,7 +125,7 @@ void loop() {
       tft.setTextSize(2); 
       tft.setCursor(85, 90); 
       tft.print("Cosmos");
-      tft.setCursor(85, 120); 
+      tft.setCursor(70, 120); 
       if (gotTime) {
         char dateBuf[12]; strftime(dateBuf, sizeof(dateBuf), "%a %d", &timeinfo);
         tft.print(dateBuf);
