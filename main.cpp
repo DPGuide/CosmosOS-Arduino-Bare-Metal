@@ -20,7 +20,7 @@ class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) { deviceConnected = true; };
     void onDisconnect(BLEServer* pServer) { 
       deviceConnected = false;
-      BLEDevice::startAdvertising();
+      BLEDevice::startAdvertising(); // Sofort wieder findbar machen
     }
 };
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -60,12 +60,10 @@ void setup() {
 void loop() {
   canvas.fillScreen(0);
   boot_frame++;
-  // Animation: Sonne wächst auf 55, rastet bei 45 ein
   int r = (boot_frame < 40) ? map(boot_frame, 0, 40, 0, 55) : 45;
   canvas.fillCircle(120, 120, r, 0xFFE0);
   if (boot_frame >= 40) {
     canvas.setTextColor(0x0000);
-    // Nachricht vom Handy oder Uhrzeit
     if (currentMsg.length() > 0) {
        canvas.setTextSize(2);
        int16_t x1, y1; uint16_t w, h;
