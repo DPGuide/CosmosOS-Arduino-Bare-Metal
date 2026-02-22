@@ -6,8 +6,8 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-const char* ssid = "youreWLAN";
-const char* password = "yourePW!";
+const char* ssid = "WLAN";
+const char* password = "PW!";
 #define TFT_CS 13
 #define TFT_DC 9
 #define TFT_RST 10
@@ -16,11 +16,13 @@ GFXcanvas16 canvas(240, 240);
 uint32_t boot_frame = 0;
 String currentMsg = "";
 bool deviceConnected = false;
+#define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID    "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) { deviceConnected = true; };
     void onDisconnect(BLEServer* pServer) { 
       deviceConnected = false;
-      BLEDevice::startAdvertising(); // Sofort wieder findbar machen
+      pServer->getAdvertising()->start();
     }
 };
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -28,7 +30,6 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       std::string value = pCharacteristic->getValue();
       if (value.length() > 0) {
         currentMsg = String(value.c_str());
-        currentMsg.trim();
       }
     }
 };
@@ -36,23 +37,25 @@ void setup() {
   Serial.begin(115200);
   tft.begin();
   tft.setRotation(0);
-  tft.setSPISpeed(80000000);
+  tft.setSPISpeed(40000000);
   BLEDevice::init("COSMOS");
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-  BLEService *pService = pServer->createService("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
+  BLEService *pService = pServer->createService(SERVICE_UUID);
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
-                                         "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
-                                         BLECharacteristic::PROPERTY_WRITE | 
+                                         CHARACTERISTIC_UUID,
+                                         BLECharacteristic::PROPERTY_READ |
+                                         BLECharacteristic::PROPERTY_WRITE |
+                                         BLECharacteristic::PROPERTY_NOTIFY |
                                          BLECharacteristic::PROPERTY_WRITE_NR
                                        );
+  pCharacteristic->addDescriptor(new BLE2902());
   pCharacteristic->setCallbacks(new MyCallbacks());
   pService->start();
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  
-  pAdvertising->setMinPreferred(0x12);
+  pAdvertising->addServiceUUID(SERVICE_UUID);
+  pAdvertising->setScanResponse(false);
+  pAdvertising->setMinPreferred(0x0); 
   BLEDevice::startAdvertising();
   WiFi.begin(ssid, password);
   configTime(3600, 3600, "pool.ntp.org");
@@ -66,14 +69,8 @@ void loop() {
     canvas.setTextColor(0x0000);
     if (currentMsg.length() > 0) {
        canvas.setTextSize(2);
-       int16_t x1, y1; uint16_t w, h;
-       canvas.getTextBounds(currentMsg.c_str(), 0, 0, &x1, &y1, &w, &h);
-       canvas.setCursor(120 - w/2, 115);
+       canvas.setCursor(60, 110);
        canvas.print(currentMsg);
-       // Timer: Nach 3 Sekunden Nachricht löschen
-       static unsigned long msgTime = 0;
-       if(msgTime == 0) msgTime = millis();
-       if(millis() - msgTime > 3000) { currentMsg = ""; msgTime = 0; }
     } else {
       struct tm timeinfo;
       if (getLocalTime(&timeinfo)) {
@@ -93,4 +90,5 @@ void loop() {
   tft.setAddrWindow(0, 0, 240, 240);
   tft.writePixels(canvas.getBuffer(), 240 * 240);
   tft.endWrite();
+  delay(10);
 }
