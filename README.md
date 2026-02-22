@@ -6,8 +6,12 @@
 
 ***Boot animation***
 
+***Server HTML Page***
+
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
 ***Notepadd for OLED***
 
-***SOLAR CLOCK***
+***SOLAR CLOCK***'
+
+***Wifi CAM***
