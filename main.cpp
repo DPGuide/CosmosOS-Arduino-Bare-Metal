@@ -22,7 +22,7 @@ Adafruit_GC9A01A tft = Adafruit_GC9A01A(TFT_CS, TFT_DC, 11, 12, TFT_RST);
 GFXcanvas16 canvas(240, 240);
 Adafruit_SSD1306 oled(128, 64, &Wire, -1);
 WebServer server(80);
-String notepadText = "Wait for Input...";
+String notepadText = "Warte auf Input...";
 uint32_t boot_frame = 0;
 bool deviceConnected = false;
 class MyServerCallbacks: public BLEServerCallbacks {
@@ -70,10 +70,13 @@ void setup() {
   tft.setRotation(0);
   tft.setSPISpeed(40000000);
   Wire.begin(OLED_SDA, OLED_SCL); 
-  if(!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) Serial.println("OLED missing!");
+  if(!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) Serial.println("OLED fehlt!");
   oled.clearDisplay();
   oled.setTextColor(SSD1306_WHITE);
-  oled.println("System Boot...");
+  oled.setTextSize(1);
+  oled.setCursor(0,0);
+  oled.println("COSMOS OS BOOT...");
+  oled.println("WiFi: Connecting...");
   oled.display();
   BLEDevice::init("COSMOS");
   BLEServer *pServer = BLEDevice::createServer();
@@ -89,6 +92,20 @@ void setup() {
   pService->start();
   BLEDevice::startAdvertising();
   WiFi.begin(ssid, password);
+  int counter = 0;
+  while (WiFi.status() != WL_CONNECTED && counter < 20) {
+    delay(500);
+    Serial.print(".");
+    counter++;
+  }
+  oled.clearDisplay();
+  oled.setCursor(0,0);
+  oled.println("WiFi CONNECTED!");
+  oled.println("");
+  oled.println("IP ADDRESS:");
+  oled.setTextSize(2);
+  oled.println(WiFi.localIP());
+  oled.display();
   configTime(3600, 3600, "pool.ntp.org");
   server.on("/", handleRoot);
   server.on("/msg", HTTP_POST, handleMessage);
