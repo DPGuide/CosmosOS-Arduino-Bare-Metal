@@ -6,10 +6,8 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-// --- WLAN SETTINGS ---
 const char* ssid = "youreWLAN";
 const char* password = "yourePW!";
-// --- OBJEKTE ---
 #define TFT_CS 13
 #define TFT_DC 9
 #define TFT_RST 10
@@ -18,7 +16,6 @@ GFXcanvas16 canvas(240, 240);
 uint32_t boot_frame = 0;
 String currentMsg = "";
 bool deviceConnected = false;
-// --- BLE CLASS ---
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) { deviceConnected = true; };
     void onDisconnect(BLEServer* pServer) { 
