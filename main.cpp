@@ -6,7 +6,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
-// --- WLAN DATEN ---
+// --- WLAN SETTINGS ---
 const char* ssid = "youreWLAN";
 const char* password = "yourePW!";
 // --- OBJEKTE ---
@@ -18,12 +18,12 @@ GFXcanvas16 canvas(240, 240);
 uint32_t boot_frame = 0;
 String currentMsg = "";
 bool deviceConnected = false;
-// --- BLE KLASSE ---
+// --- BLE CLASS ---
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) { deviceConnected = true; };
     void onDisconnect(BLEServer* pServer) { 
       deviceConnected = false;
-      BLEDevice::startAdvertising(); // Sofort wieder findbar machen
+      BLEDevice::startAdvertising();
     }
 };
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -40,11 +40,9 @@ void setup() {
   tft.begin();
   tft.setRotation(0);
   tft.setSPISpeed(80000000);
-  // BLE INITIALISIERUNG
   BLEDevice::init("COSMOS");
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new MyServerCallbacks());
-  // UART Service UUID (Nordic Standard)
   BLEService *pService = pServer->createService("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
   BLECharacteristic *pCharacteristic = pService->createCharacteristic(
                                          "6E400002-B5A3-F393-E0A9-E50E24DCCA9E",
@@ -53,7 +51,6 @@ void setup() {
                                        );
   pCharacteristic->setCallbacks(new MyCallbacks());
   pService->start();
-  // Advertising optimieren für Status 147
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID("6E400001-B5A3-F393-E0A9-E50E24DCCA9E");
   pAdvertising->setScanResponse(true);
@@ -95,10 +92,8 @@ void loop() {
         canvas.print(dateBuf);
       }
     }
-    // Kleiner blauer Statuspunkt wenn Handy verbunden
     if (deviceConnected) canvas.fillCircle(220, 120, 4, 0x001F);
   }
-  // Buffer Push zum Display
   tft.startWrite();
   tft.setAddrWindow(0, 0, 240, 240);
   tft.writePixels(canvas.getBuffer(), 240 * 240);
