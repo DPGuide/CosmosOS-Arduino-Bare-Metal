@@ -14,7 +14,5 @@
 ***SOLAR CLOCK***'
 
 ***under construction***
-
-+***Global chat and closed room chat are being developed.***
-
-+***owen filesystem bare metal will be implemented***
++ ***Global chat and closed room chat are being developed.***
++ ***owen filesystem bare metal will be implemented***
