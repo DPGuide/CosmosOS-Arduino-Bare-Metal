@@ -12,3 +12,7 @@
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
 ***SOLAR CLOCK***'
+
+***Global chat and closed room chat are being developed.***
+
+***owen filesystem bare metal will be implemented***
