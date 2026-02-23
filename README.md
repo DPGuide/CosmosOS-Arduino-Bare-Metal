@@ -11,7 +11,11 @@
 
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
-***SOLAR CLOCK***'
+***Screensaver - SOLAR CLOCK***'
+
+***APPS SYSTEM Added***
+
+***CAM GESTURE ADDED***
 
 ***under construction***
 + ***Global chat and closed room chat are being developed.***
