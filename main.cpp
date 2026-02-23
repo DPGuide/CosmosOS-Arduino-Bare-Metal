@@ -87,8 +87,8 @@ void handleRoot() {
   html += "<div style='background:#000; color:#0f0; font-family:monospace; text-align:left; padding:10px; height:120px; overflow-y:auto; border:1px solid #333; width:90%; margin: 0 auto; border-radius:5px;'>";
   html += "COSMOS OS v1.0 (ESP32-S3 Port)<br>Memory: OK<br>C:\\> <span id='output'>" + terminalLog + "</span></div>";
   html += "<form action='/cmd' method='POST' style='margin-top:5px;'>";
-  html += "  <input type='text' name='command' autofocus autocomplete='off' style='background:#000; color:#0f0; font-family:monospace; width:70%; border:1px solid #333; padding:8px;' placeholder='z.B. reboot, cls...'>";
-  html += "  <input type='submit' value='EXECUTE' style='background:#333; color:#0f0; border:none; padding:9px; font-weight:bold;'>";
+  html += "<input type='text' name='command' autofocus autocomplete='off' style='background:#000; color:#0f0; font-family:monospace; width:70%; border:1px solid #333; padding:8px;' placeholder='z.B. reboot, cls, ping, echo text'>";
+  html += "<input type='submit' value='EXECUTE' style='background:#333; color:#0f0; border:none; padding:9px; font-weight:bold;'>";
   html += "</form>";
   html += "<hr style='border:1px solid #333; width:90%; margin:30px auto;'>";
   html += "<h2>COMMUNICATION SECTOR</h2>";
