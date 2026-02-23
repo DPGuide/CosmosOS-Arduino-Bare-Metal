@@ -36,7 +36,10 @@ bool isBooting = true;
 int lastBootRadius = 0;
 String currentMsg = ""; 
 String lastMsg = "";
-String terminalLog = "Wait of command...";    
+String terminalLog = "Wait of command...";
+String chatOpen = "<i>System: Welcome to the open room.</i><br>";
+String chatClosed = "<i>System: Secure channel encrypted.</i><br>";
+int activeRoom = 1;
 bool deviceConnected = false;
 bool timeIsSynced = false;
 #define SERVICE_UUID           "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
@@ -54,7 +57,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       if (value.length() > 0) {
         String input = String(value.c_str());
         input.trim();
-        if(input.equalsIgnoreCase("UHR") || input.equalsIgnoreCase("CLS")) {
+        if(input.equalsIgnoreCase("CLOCK") || input.equalsIgnoreCase("CLS")) {
           currentMsg = ""; 
         } else {
           currentMsg = input;
@@ -63,28 +66,50 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 void handleRoot() {
+  if (server.hasArg("room")) {
+    activeRoom = server.arg("room").toInt();
+  }
   String html = "<html><body style='font-family:sans-serif; text-align:center; background:#111; color:white;'>";
   html += "<h1>COSMOS MISSION CONTROL</h1>";
-  html += "<img id='camstream' src='http://youreCamIP/jpg' style='width:90%; max-width:600px; border-radius:15px; border:2px solid #555; margin-bottom:20px;'><br>";
-  html += "<script>";
-  html += "setInterval(function() {";
-  html += "  document.getElementById('camstream').src = 'http://youreCamIP/jpg?' + new Date().getTime();";
-  html += "}, 200);";
-  html += "</script>";
-  html += "<form action='/msg' method='POST'>";
-  html += "<textarea name='text' rows='4' style='width:90%; font-size:1.2em; border-radius:5px;'></textarea><br><br>";
-  html += "<input type='submit' value='SEND TO OLED' style='padding:10px 20px; font-weight:bold; background:#FFD700; color:black; border:none; border-radius:5px;'>";
-  html += "</form>";
-  html += "<br><form action='/clear' method='POST'><input type='submit' value='OLED BACK TO CLOCK' style='padding:10px 20px; border-radius:5px;'></form><br>";
+  html += "<img id='camstream' src='http://YoureWlanIP/jpg' style='width:90%; max-width:240px; border-radius:15px; border:2px solid #555; margin-bottom:20px;'><br>";
+  html += "<script>setInterval(function() { document.getElementById('camstream').src = 'http://YoureWlanIP/jpg?' + new Date().getTime(); }, 200);</script>";
+  html += "<div style='background:#222; padding:15px; width:90%; margin: 0 auto; border-radius:10px; border:1px solid #444;'>";
+  html += "  <textarea id='oledInput' name='text' form='msgForm' rows='3' style='width:95%; border-radius:5px; font-size:1.1em;' placeholder='Text für OLED...'></textarea><br>";
+  html += "  <div style='display: flex; justify-content: center; gap: 10px; margin-top: 10px;'>";
+  html += "    <form id='msgForm' action='/msg' method='POST' style='margin:0;'>";
+  html += "      <input type='submit' value='SEND TO OLED' style='background:#FFD700; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;'>";
+  html += "    </form>";
+  html += "    <form action='/clear' method='POST' style='margin:0;'>";
+  html += "      <input type='submit' value='CLOCK MODE' style='background:#444; color:#fff; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;'>";
+  html += "    </form>";
+  html += "  </div>";
+  html += "</div><br>";
   html += "<div style='background:#000; color:#0f0; font-family:monospace; text-align:left; padding:10px; height:120px; overflow-y:auto; border:1px solid #333; width:90%; margin: 0 auto; border-radius:5px;'>";
-  html += "COSMOS OS v1.0 (ESP32-S3 Port)<br>";
-  html += "Memory: OK<br>";
-  html += "C:\\> <span id='output'>" + terminalLog + "</span>";
-  html += "</div>";
+  html += "COSMOS OS v1.0 (ESP32-S3 Port)<br>Memory: OK<br>C:\\> <span id='output'>" + terminalLog + "</span></div>";
   html += "<form action='/cmd' method='POST' style='margin-top:5px;'>";
-  html += "<input type='text' name='command' autofocus autocomplete='off' style='background:#000; color:#0f0; font-family:monospace; width:70%; border:1px solid #333; padding:8px;' placeholder='z.B. reboot, cls, ping, echo text'>";
-  html += "<input type='submit' value='EXECUTE' style='background:#333; color:#0f0; border:none; padding:9px; font-weight:bold;'>";
+  html += "  <input type='text' name='command' autofocus autocomplete='off' style='background:#000; color:#0f0; font-family:monospace; width:70%; border:1px solid #333; padding:8px;' placeholder='z.B. reboot, cls...'>";
+  html += "  <input type='submit' value='EXECUTE' style='background:#333; color:#0f0; border:none; padding:9px; font-weight:bold;'>";
   html += "</form>";
+  html += "<hr style='border:1px solid #333; width:90%; margin:30px auto;'>";
+  html += "<h2>COMMUNICATION SECTOR</h2>";
+  html += "<div style='margin-bottom:10px;'>";
+  html += "  <a href='/?room=1' style='padding:10px; background:" + String(activeRoom == 1 ? "#00ff00;color:black;" : "#333;color:white;") + "text-decoration:none; border-radius:5px; margin-right:5px;'>Global CHAT</a>";
+  html += "  <a href='/?room=2' style='padding:10px; background:" + String(activeRoom == 2 ? "#ff4444;color:white;" : "#333;color:white;") + "text-decoration:none; border-radius:5px;'>Closed Rooms</a>";
+  html += "</div>";
+  html += "<div style='background:#050505; color:#eee; font-family:monospace; text-align:left; padding:15px; height:200px; overflow-y:auto; border:2px solid " + String(activeRoom == 1 ? "#00ff00" : "#ff4444") + "; width:90%; margin: 0 auto; border-radius:10px;'>";
+  html += (activeRoom == 1 ? chatOpen : chatClosed);
+  html += "</div>";
+  html += "<div style='margin-top:10px;'>";
+  html += "  <form action='/chat' method='POST' style='display:inline;'>";
+  html += "    <input type='hidden' name='room' value='" + String(activeRoom) + "'>";
+  html += "    <input type='text' name='msg' placeholder='Write a message..' style='background:#000; color:#fff; width:60%; border:1px solid #555; padding:10px; border-radius:5px;'> ";
+  html += "    <input type='submit' value='SEND' style='background:#555; color:white; border:none; padding:10px 20px; font-weight:bold; cursor:pointer; border-radius:5px;'>";
+  html += "  </form>";
+  html += "  <form action='/clearchat' method='POST' style='display:inline; margin-left:5px;'>";
+  html += "    <input type='hidden' name='room' value='" + String(activeRoom) + "'>";
+  html += "    <input type='submit' value='CLEAR' style='background:#222; color:#888; border:1px solid #444; padding:10px 10px; cursor:pointer; border-radius:5px;'>";
+  html += "  </form>";
+  html += "</div>";
   html += "</body></html>";
   server.send(200, "text/html", html);
 }
@@ -102,26 +127,26 @@ void handleCmd() {
   String lowerCmd = cmd;
   lowerCmd.toLowerCase();
   if (lowerCmd == "reboot") {
-    server.send(200, "text/html", "<html><body style='background:#000; color:#0f0; font-family:monospace;'>System rebooting... Bitte kurz warten.</body></html>");
+    server.send(200, "text/html", "<html><body style='background:#000; color:#0f0; font-family:monospace;'>System rebooting... jsut a moment.</body></html>");
     delay(1000);
     ESP.restart();
   } 
   else if (lowerCmd == "ping") {
-    terminalLog = "pong! (Verbindung steht)";
+    terminalLog = "pong! (System online)";
   }
   else if (lowerCmd == "cls" || lowerCmd == "clear") {
-    terminalLog = "Warte auf Befehl...";
+    terminalLog = "Wait for commands...";
   }
   else if (lowerCmd.startsWith("echo ")) {
     String textToOled = cmd.substring(5); 
     currentMsg = textToOled; 
-    terminalLog = "Erfolgreich an OLED gesendet: " + textToOled;
+    terminalLog = "Successfully sent to OLED: " + textToOled;
   }
   else if (lowerCmd == "") {
-    terminalLog = "Bitte Befehl eingeben.";
+    terminalLog = "Please enter command.";
   }
   else {
-    terminalLog = "Befehl nicht gefunden: " + cmd;
+    terminalLog = "Command not found: " + cmd;
   }
   if (lowerCmd != "reboot") {
     server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=/'></head><body></body></html>");
@@ -130,7 +155,7 @@ void handleCmd() {
 void setup() {
   Serial.begin(115200);
   Wire.begin(OLED_SDA, OLED_SCL);
-  if(!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) Serial.println(F("OLED nicht gefunden!"));
+  if(!oled.begin(SSD1306_SWITCHCAPVCC, 0x3C)) Serial.println(F("OLED not found!"));
   oled.clearDisplay(); oled.display();
   tft.begin();
   tft.setRotation(0);
@@ -151,7 +176,34 @@ void setup() {
   server.on("/clear", HTTP_POST, handleClear);
   server.begin();
   server.on("/cmd", HTTP_POST, handleCmd);
+  server.on("/chat", HTTP_POST, handleChat);
+  server.on("/clearchat", HTTP_POST, handleClearChat);
+  server.begin();
   bootStartTime = millis(); 
+}
+void handleChat() {
+  if (server.hasArg("msg")) {
+    String msg = server.arg("msg");
+    String room = server.arg("room");
+    msg.replace("<", "&lt;"); 
+    if (room == "2") {
+      chatClosed += "<b>User:</b> " + msg + "<br>";
+    } else {
+      chatOpen += "<b>User:</b> " + msg + "<br>";
+    }
+  }
+  String target = "/?room=" + server.arg("room");
+  server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=" + target + "'></head><body></body></html>");
+}
+void handleClearChat() {
+  String room = server.arg("room");
+  if (room == "2") {
+    chatClosed = "<i>System: Secure channel.</i><br>";
+  } else {
+    chatOpen = "<i>System: under construction.</i><br>";
+  }
+  String target = "/?room=" + room;
+  server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=" + target + "'></head><body></body></html>");
 }
 void loop() {
   delay(10); 
@@ -172,12 +224,12 @@ void loop() {
       tft.setTextSize(2); 
       tft.setCursor(85, 90); 
       tft.print("Cosmos");
-      tft.setCursor(70, 120); 
+      tft.setCursor(85, 120); 
       if (gotTime) {
         char dateBuf[12]; strftime(dateBuf, sizeof(dateBuf), "%a %d", &timeinfo);
         tft.print(dateBuf);
       } else {
-        tft.setTextSize(1);
+        tft.setTextSize(1.8);
         tft.print("WiFi Sync...");
       }
     }
@@ -206,7 +258,7 @@ void loop() {
     oled.clearDisplay();
     oled.setTextColor(SSD1306_WHITE);
     oled.setTextSize(2);
-    oled.setCursor(15, 25);
+    oled.setCursor(20, 25);
     oled.printf("%02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
     oled.display();
   }
