@@ -13,7 +13,7 @@
 
 ***Screensaver - SOLAR CLOCK***'
 
-***APPS SYSTEM Added***
+***Planetary APPS SYSTEM Added***
 
 ***CAM GESTURE ADDED***
 
