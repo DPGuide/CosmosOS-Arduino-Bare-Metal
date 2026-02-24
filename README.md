@@ -8,7 +8,7 @@
 
 ***Server HTML Page***
 + ***Notepad + Wifi Cam***
-+ ***Global chat and closed room chat***
++ ***Global chat and closed room chat and PM***
 
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
