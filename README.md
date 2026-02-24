@@ -21,5 +21,6 @@
 ***For ESP32 GESTURE ADDED***
 
 ***under construction***
++ ***Piezo / Sound***
 + ***Cam GESTURE image at training***
 + ***owen filesystem bare metal *.tba will be implemented***
