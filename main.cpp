@@ -26,8 +26,8 @@ Adafruit_GC9A01A tft = Adafruit_GC9A01A(TFT_CS, TFT_DC, TFT_SDA, TFT_SCL, TFT_RS
 GFXcanvas16 canvas(240, 240); 
 #define WIDTH 240
 #define HEIGHT 240
-const char* ssid     = "ClosedDoor";
-const char* password = "14TobY14!";
+const char* ssid     = "wlan";
+const char* password = "pw!";
 const int sin_lut[256] = { 
   1, 2, 4, 7, 9, 12, 14, 17, 19, 21, 24, 26, 28, 30, 33, 35, 
   37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 56, 58, 60, 61, 63, 64, 
