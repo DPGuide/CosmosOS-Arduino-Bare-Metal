@@ -19,4 +19,4 @@
 
 ***under construction***
 + ***Global chat and closed room chat are being developed.***
-+ ***owen filesystem bare metal will be implemented***
++ ***owen filesystem bare metal *.tba will be implemented***
