@@ -17,8 +17,8 @@
 
 ***Planetary APPS SYSTEM Added***
 
-***CAM GESTURE ADDED***
+***For ESP32 GESTURE ADDED***
 
 ***under construction***
-+ ***Gestick***
++ ***Cam GESTURE image at training***
 + ***owen filesystem bare metal *.tba will be implemented***
