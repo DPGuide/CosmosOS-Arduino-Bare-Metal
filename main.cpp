@@ -27,7 +27,7 @@ GFXcanvas16 canvas(240, 240);
 #define WIDTH 240
 #define HEIGHT 240
 const char* ssid = "FreeWiFi";
-const char* password = "123PW456!";
+const char* password = "123haha456!";
 const int sin_lut[256] = {
   1, 2, 4, 7, 9, 12, 14, 17, 19, 21, 24, 26, 28, 30, 33, 35,
   37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 56, 58, 60, 61, 63, 64,
@@ -46,6 +46,8 @@ const int sin_lut[256] = {
   -53, -51, -49, -47, -45, -43, -41, -39, -37, -35, -33, -30, -28,
   -26, -24, -21, -19, -17, -14, -12, -9, -7, -4, -2, -1
 };
+int selfDestructTimer = -1;
+uint32_t lastTick = 0;
 inline int Cos(int a) {
   return sin_lut[(a + 64) % 256];
 }
@@ -76,6 +78,8 @@ struct Planet {
   int ang;
   int dist;
   char name[8];
+  uint16_t color;
+  uint16_t textColor;
 };
 Planet planets[5];
 float planetRadii[9] = {25, 36, 47, 58, 69, 80, 91, 102, 113};
@@ -488,12 +492,20 @@ void handleCmd() {
     terminalLog += "<b>cls / clear</b> - Clear terminal memory<br>";
     terminalLog += "<b>sys / apps</b> - System status & UI planets<br>";
     terminalLog += "<b>hide</b> - Hide UI planets<br>";
+    terminalLog += "<b>format</b> - format 0 / hahaha<br>";
     terminalLog += "<b>mem</b> - Heap analysis (RAM check)<br>";
     terminalLog += "<b>wifi</b> - Wi-Fi signal strength (RSSI)<br>";
     terminalLog += "<b>speed [x]</b> - Set warp factor (stars)<br>";
     terminalLog += "<b>echo [txt]</b> - Send a message to OLED<br>";
     terminalLog += "<b>help</b> - Show this list of commands<br>";
     terminalLog += "A:\\> ";
+  } else if (lowerCmd == "format 0") {
+    selfDestructTimer = 5;
+    lastTick = millis();
+    terminalLog = "<span style='color:red; font-weight:bold;'>!!! EMERGENCY SELF-DESTRUCT !!!</span><br>";
+    terminalLog += "LOCAL & REMOTE SYNC INITIATED...<br>";
+    terminalLog += "COUNTDOWN: <span id='count' style='font-size:2em;'>5</span>";
+    terminalLog += "<script>let t=5; setInterval(()=>{if(t>0){t--; document.getElementById('count').innerText=t;}},1000);</script>";
   } else if (lowerCmd == "") {
     terminalLog = "READY. ENTER MISSION PARAMETERS.";
   } else {
@@ -520,6 +532,27 @@ void handleClearChat() {
   else chatOpen = "<i>System: under construction.</i><br>";
   String target = "/?room=" + room;
   server.send(200, "text/html", "<html><head><meta http-equiv='refresh' content='0;url=" + target + "'></head><body></body></html>");
+}
+void drawSelfDestruct() {
+  if (selfDestructTimer < 0) return;
+  uint16_t bgColor = (millis() % 500 < 250) ? 0xF800 : 0x0000;
+  canvas.fillScreen(bgColor);
+  canvas.setTextColor(0xFFFF);
+  int16_t x1, y1;
+  uint16_t w, h;
+  canvas.setTextSize(3);
+  canvas.getTextBounds("AUTO-DESTRUCT", 0, 0, &x1, &y1, &w, &h);
+  canvas.setCursor(120 - (w / 2), 60); 
+  canvas.print("AUTO-DESTRUCT");
+  canvas.setTextSize(12);
+  String s = String(selfDestructTimer);
+  canvas.getTextBounds(s, 0, 0, &x1, &y1, &w, &h);
+  canvas.setCursor(120 - (w / 2), 150 - (h / 2));
+  canvas.print(s);
+  canvas.setTextSize(1);
+  canvas.getTextBounds("CORE WIPE IN PROGRESS", 0, 0, &x1, &y1, &w, &h);
+  canvas.setCursor(120 - (w / 2), 210);
+  canvas.print("CORE WIPE IN PROGRESS");
 }
 void initStars() {
   for (int i = 0; i < 100; i++) {
@@ -553,18 +586,19 @@ void drawStarfield() {
 void drawAppPlanets() {
   if (appDeployment <= 0.01) return;
   for (int i = 0; i < 5; i++) {
+    planets[i].textColor = 0xFFE0;
     int currentAng = (planets[i].ang + (millis() / (20 + i * 5))) % 256;
     float currentDist = planets[i].dist * appDeployment;
     int tx = 120 + (Cos(currentAng) * currentDist) / 84;
-    int ty = 120 + (Sin(currentAng) * currentDist * 3 / 4) / 84;
-    int size = map(appDeployment * 100, 0, 100, 1, 10);
-    canvas.fillCircle(tx, ty, size, color32to16(0x444444));
-    if (appDeployment > 0.8) {
-      canvas.setCursor(tx - 10, ty - 4);
-      canvas.setTextColor(C_WHITE);
-      canvas.setTextSize(1);
-      canvas.print(planets[i].name);
-    }
+    int ty = 120 + (Sin(currentAng) * currentDist) / 84;
+    int size = 2 + (appDeployment * 12);
+    canvas.fillCircle(tx, ty, size, color32to16(0xBBBBBB));
+    canvas.setTextColor(planets[i].textColor);
+    canvas.setTextSize(1);
+    int textOffset = (strlen(planets[i].name) * 3); 
+    canvas.setCursor(tx - textOffset, ty - 3);
+    canvas.setTextColor(0x0000);
+    canvas.print(planets[i].name);
   }
 }
 void drawClockPlanets(struct tm& timeinfo) {
@@ -620,10 +654,14 @@ void setup() {
   tft.fillScreen(C_SPACE);
   initStars();
   const char* names[] = { "TXT", "SYS", "APP", "CMD", "DAT" };
+  uint16_t appColors[]  = { 0xFFFF, 0x07E0, 0x001F, 0xF800, 0xFFE0 };
+  uint16_t textColors[] = { 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000 };
   for (int i = 0; i < 5; i++) {
     planets[i].ang = i * 51;
     planets[i].dist = 60 + i * 20;
     strcpy(planets[i].name, names[i]);
+    planets[i].color = appColors[i];
+    planets[i].textColor = textColors[i];
   }
   BLEDevice::init("COSMOS");
   BLEServer* pServer = BLEDevice::createServer();
@@ -662,7 +700,7 @@ void loop() {
         lastBootRadius = r;
       }
     } else {
-      Clear(0x0000);
+      canvas.fillScreen(0); 
       drawStarfield();
       drawClockPlanets(timeinfo);
       canvas.fillCircle(120, 120, 45, C_YELLOW);
@@ -679,6 +717,7 @@ void loop() {
         canvas.setTextSize(1);
         canvas.print("WiFi Sync...");
       }
+      tft.drawRGBBitmap(0, 0, canvas.getBuffer(), 240, 240);
       Swap();
     }
     if (elapsed > 3500 && timeIsSynced) {
@@ -709,21 +748,34 @@ void loop() {
     oled.printf("%02d:%02d:%02d", timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
     oled.display();
   }
-  Clear(0x0000);
-  drawStarfield();
-  if (showAppPlanets) {
-    if (appDeployment < 1.0) appDeployment += 0.05;
-  } else {
-    if (appDeployment > 0.0) appDeployment -= 0.05;
-  }
-  if (appDeployment > 0.01) {
-    drawAppPlanets();
-    canvas.fillCircle(120, 120, 12, C_YELLOW);
-  } else {
-    drawClockPlanets(timeinfo);
-    Swap();
-    if (millis() - lastActivityTime > screensaverTimeout) {
-      showAppPlanets = false;
+  if (selfDestructTimer >= 0) {
+    if (millis() - lastTick >= 1000) {
+      lastTick = millis();
+      selfDestructTimer--;
+      if (selfDestructTimer == 0) ESP.restart(); 
     }
   }
+  canvas.fillScreen(0);
+  if (selfDestructTimer >= 0) {
+    drawSelfDestruct();
+  } 
+  else {
+    drawStarfield();
+    if (showAppPlanets) {
+      if (appDeployment < 1.0) appDeployment += 0.05;
+    } else {
+      if (appDeployment > 0.0) appDeployment -= 0.05;
+    }
+    if (appDeployment > 0.01) {
+      drawAppPlanets();
+      canvas.fillCircle(120, 120, 12, C_YELLOW);
+    } else {
+      drawClockPlanets(timeinfo);
+      if (millis() - lastActivityTime > screensaverTimeout) {
+        showAppPlanets = false;
+      }
+    }
+  }
+  tft.drawRGBBitmap(0, 0, canvas.getBuffer(), 240, 240);
+  //Swap();
 }
