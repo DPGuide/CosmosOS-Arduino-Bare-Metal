@@ -103,7 +103,7 @@ bool deviceConnected = false;
 bool timeIsSynced = false;
 unsigned long lastActivityTime = 0;
 unsigned long screensaverTimeout = 300000;
-bool showAppPlanets = true;
+bool showAppPlanets = false;
 float appDeployment = 0.0;
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
@@ -147,7 +147,7 @@ void handleRoot() {
   html += "</style></head><body>";
   html += "<h1>COSMOS MISSION CONTROL</h1>";
   html += "<div style='margin-bottom:10px;'>";
-  html += "  <img id='camstream' src='http://YoureWlanIP/jpg' style='width:90%; max-width:240px; border-radius:15px; border:2px solid #555;'>";
+  html += "  <img id='camstream' src='http://YoureIP/jpg' style='width:90%; max-width:240px; border-radius:15px; border:2px solid #555;'>";
   html += "  <div id='fpsCounter' style='color:#0f0; font-size:0.8em; font-family:monospace;'>FPS: 0</div>";
   html += "</div>";
   html += "<script>";
@@ -155,7 +155,7 @@ void handleRoot() {
   html += "let lastTime = performance.now();";
   html += "function loadNextFrame() {";
   html += "  let img = new Image();";
-  html += "  img.src = 'http://YoureWlanIP/jpg?' + Date.now();";
+  html += "  img.src = 'http://YoureIP/jpg?' + Date.now();";
   html += "  ";
   html += "  img.onload = function() {";
   html += "    document.getElementById('camstream').src = this.src;";
@@ -605,15 +605,13 @@ void drawClockPlanets(struct tm& timeinfo) {
   float mAng = (timeinfo.tm_min * 6 - 90) * M_PI / 180.0;
   float hAng = ((timeinfo.tm_hour % 12) * 30 + timeinfo.tm_min * 0.5 - 90) * M_PI / 180.0;
   float angles[9];
-  angles[0] = sAng;
-  angles[4] = mAng;
-  angles[8] = hAng;
-  angles[1] = sAng + (mAng - sAng) * 0.05;
-  angles[2] = sAng + (mAng - sAng) * 0.10;
-  angles[3] = sAng + (mAng - sAng) * 0.20;
-  angles[5] = mAng + (hAng - mAng) * 0.30;
-  angles[6] = mAng + (hAng - mAng) * 0.40;
-  angles[7] = mAng + (hAng - mAng) * 0.50;
+  angles[0] = sAng; angles[4] = mAng; angles[8] = hAng;
+  angles[1] = sAng + (sAng - mAng) * 0.05; 
+  angles[2] = sAng + (mAng - mAng) * 0.10;
+  angles[3] = mAng + (mAng - mAng) * 0.20;
+  angles[5] = mAng + (mAng - hAng) * 0.30;
+  angles[6] = mAng + (hAng - hAng) * 0.40;
+  angles[7] = hAng + (hAng - hAng) * 0.50;
   for (int i = 0; i < 9; i++) {
     int x = 120 + cos(angles[i]) * planetRadii[i];
     int y = 120 + sin(angles[i]) * planetRadii[i];
