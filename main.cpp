@@ -586,7 +586,6 @@ void drawStarfield() {
 void drawAppPlanets() {
   if (appDeployment <= 0.01) return;
   for (int i = 0; i < 5; i++) {
-    planets[i].textColor = 0xFFE0;
     int currentAng = (planets[i].ang + (millis() / (20 + i * 5))) % 256;
     float currentDist = planets[i].dist * appDeployment;
     int tx = 120 + (Cos(currentAng) * currentDist) / 84;
@@ -597,7 +596,7 @@ void drawAppPlanets() {
     canvas.setTextSize(1);
     int textOffset = (strlen(planets[i].name) * 3); 
     canvas.setCursor(tx - textOffset, ty - 3);
-    canvas.setTextColor(0x0000);
+    canvas.setTextColor(0xFFE0);
     canvas.print(planets[i].name);
   }
 }
@@ -654,14 +653,10 @@ void setup() {
   tft.fillScreen(C_SPACE);
   initStars();
   const char* names[] = { "TXT", "SYS", "APP", "CMD", "DAT" };
-  uint16_t appColors[]  = { 0xFFFF, 0x07E0, 0x001F, 0xF800, 0xFFE0 };
-  uint16_t textColors[] = { 0x0000, 0x0000, 0xFFFF, 0xFFFF, 0x0000 };
   for (int i = 0; i < 5; i++) {
     planets[i].ang = i * 51;
     planets[i].dist = 60 + i * 20;
     strcpy(planets[i].name, names[i]);
-    planets[i].color = appColors[i];
-    planets[i].textColor = textColors[i];
   }
   BLEDevice::init("COSMOS");
   BLEServer* pServer = BLEDevice::createServer();
