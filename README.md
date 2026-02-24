@@ -8,6 +8,7 @@
 
 ***Server HTML Page***
 + ***Notepad + Wifi Cam***
++ ***Global chat and closed room chat***
 
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
@@ -18,5 +19,5 @@
 ***CAM GESTURE ADDED***
 
 ***under construction***
-+ ***Global chat and closed room chat are being developed.***
++ ***Gestick***
 + ***owen filesystem bare metal *.tba will be implemented***
