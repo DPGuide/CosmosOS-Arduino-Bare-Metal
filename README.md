@@ -8,7 +8,8 @@
 ***Boot animation***
 
 ***Server HTML Page***
-+ ***Notepad + Wifi Cam***
++ ***Wifi Cam***
++ ***Notepad***
 + ***Global chat and closed room chat and PM***
 + ***Tiny CMD with easter egg***
 
