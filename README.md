@@ -9,7 +9,7 @@
 ***Server HTML Page***
 + ***Notepad + Wifi Cam***
 + ***Global chat and closed room chat and PM***
-+ ***CMD with easter egg***
++ ***Tiny CMD with easter egg***
 
 ***BT Mouse Keyboard, but still my android APK is bugged***
 
