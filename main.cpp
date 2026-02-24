@@ -122,8 +122,8 @@ void handleRoot() {
   html += ".debug{color:#ff6600; font-size:0.8em;}";
   html += "</style></head><body>";
   html += "<h1>COSMOS MISSION CONTROL</h1>";
-  html += "<img id='camstream' src='http://192.168.14.91/jpg' style='width:90%; max-width:240px; border-radius:15px; border:2px solid #555; margin-bottom:10px;'><br>";
-  html += "<script>setInterval(function(){document.getElementById('camstream').src='http://192.168.14.91/jpg?'+Date.now();},200);</script>";
+  html += "<img id='camstream' src='http://YoureWlanIP/jpg' style='width:90%; max-width:240px; border-radius:15px; border:2px solid #555; margin-bottom:10px;'><br>";
+  html += "<script>setInterval(function(){document.getElementById('camstream').src='http://YoureWlanIP/jpg?'+Date.now();},200);</script>";
   html += "<input type='text' id='userNameInput' placeholder='Your Name (empty = Random)' style='background:#000; color:#0f0; border:1px solid #0f0; padding:5px; width:200px; margin-bottom:10px;'><br>";
   html += "<div class='container'>";
   html += "  <div id='status'>CURRENT CHANNEL: <b id='modeLabel'>GLOBAL CHAT</b></div>";
@@ -133,7 +133,7 @@ void handleRoot() {
   html += "      <div id='rooms'><div style='color:#666; font-size:0.8em;'>Loading...</div></div>";
   html += "      <div id='userList'><strong>MISSION_PEOPLE</strong><div id='users'><div style='color:#666;'>Loading...</div></div></div>";
   html += "    </div>";
-  html += "    <div id='chatWindow'><div style='color:#666; padding:10px;'>--- GLOBALER KANAL ---</div></div>";
+  html += "    <div id='chatWindow'><div style='color:#666; padding:10px;'>--- GLOBAL KANAL ---</div></div>";
   html += "  </div>";
   html += "  <div class='controls'>";
   html += "    <input type='text' id='msgInput' placeholder='Send CURRENT CHANNEL transmission...'>";
