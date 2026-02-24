@@ -3,7 +3,7 @@
 ***for ESPN32 arduino***
 
 ***ESP32 S3 N16R8 DevKitC-1 Module***
-+ ***TFT & OLED***
++ ***TFT, OLED & CAM***
 
 ***Boot animation***
 
